@@ -47,6 +47,13 @@ def canContinue(root: Tk, text: Text):
         if current_file:
             current_file.write_text(text.get("1.0", END), encoding="utf8")
 
+    def save(root: Tk, text: Text):
+        global current_file
+        if current_file is None:
+            saveAs(root, text)
+        else: 
+            saveCurrent(text)
+
 root = Tk()
 root.title("Notepad")
 root.geometry("800x600")
