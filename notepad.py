@@ -21,51 +21,69 @@ def canContinue(root: Tk, text: Text):
             save(root, text)
         return True
     
-    def newFile(root: Tk, text: Text):
-        global current_file
-        if not canContinue(root, text):
-            return
-        text.delete("1,0", END)
-        current_file = None
-        setTitle(root, current_file)
+def newFile(root: Tk, text: Text):
+    global current_file
+    if not canContinue(root, text):
+        return
+    text.delete("1,0", END)
+    current_file = None
+    setTitle(root, current_file)
 
-    def openFile(root: Tk, text: Text):
-        global current_file
-        filename = filedialog.askopenfilename(filetypes=filetypes)
-        if not filename or not canContinue(root, text):
-            return
-        with open(filename, encoding="utf8") as file:
-            content = file.read()
-        text.delete("1.0", END)
-        text.insert("1.0", content)
-        text.edit_modified(False)
+def openFile(root: Tk, text: Text):
+    global current_file
+    filename = filedialog.askopenfilename(filetypes=filetypes)
+    if not filename or not canContinue(root, text):
+        return
+    with open(filename, encoding="utf8") as file:
+        content = file.read()
+    text.delete("1.0", END)
+    text.insert("1.0", content)
+    text.edit_modified(False)
+    current_file = Path(filename)
+    setTitle(root, current_file)
+
+def saveCurrent(text: Text) -> None:
+    global current_file
+    if current_file:
+        current_file.write_text(text.get("1.0", END), encoding="utf8")
+
+def save(root: Tk, text: Text):
+    global current_file
+    if current_file is None:
+        saveAs(root, text)
+    else: 
+        saveCurrent(text)
+
+def saveAs(root: Tk, text: Text):
+    global current_file
+    filename = filedialog.asksaveasfilename(
+        defaultextension=".txt",
+        filetypes=filetypes
+    )
+    if filename:
         current_file = Path(filename)
+        saveCurrent(text)
         setTitle(root, current_file)
-
-    def saveCurrent(text: Text) -> None:
-        global current_file
-        if current_file:
-            current_file.write_text(text.get("1.0", END), encoding="utf8")
-
-    def save(root: Tk, text: Text):
-        global current_file
-        if current_file is None:
-            saveAs(root, text)
-        else: 
-            saveCurrent(text)
+    
+def onClose(root: Tk, text: Text):
+    if canContinue(root, text):
+        root.destroy()
 
 root = Tk()
 root.title("Notepad")
 root.geometry("800x600")
+
+text = Text(root)
+text.pack(expand=True, fill=BOTH)
+
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0) # Test
-filemenu.add_command(label="New", command="")
-filemenu.add_command(label="Open", command="")
-filemenu.add_command(label="Save", command="")
-filemenu.add_command(label="Save As...", command="")
-filemenu.add_command(label="Close", command="")
-
+filemenu.add_command(label="New", command=lambda: newFile(root, text))
+filemenu.add_command(label="Open", command=lambda: openFile(root, text))
+filemenu.add_command(label="Save", command=lambda: save(root, text))
+filemenu.add_command(label="Save As...", command=lambda: saveAs(root, text))
 filemenu.add_separator()
+filemenu.add_command(label="Close", command=lambda: onClose(root, text))
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
 
