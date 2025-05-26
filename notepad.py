@@ -42,7 +42,7 @@ def canContinue(root: Tk, text: Text):
         current_file = Path(filename)
         setTitle(root, current_file)
 
-    def saveCurrent(text: Text):
+    def saveCurrent(text: Text) -> None:
         global current_file
         if current_file:
             current_file.write_text(text.get("1.0", END), encoding="utf8")
