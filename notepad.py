@@ -69,11 +69,27 @@ def onClose(root: Tk, text: Text):
     if canContinue(root, text):
         root.destroy()
 
+def cut(root: Tk, text: Text):
+    text.event_generate("<<Cut>>")
+
+def copy(root: Tk, text: Text):
+    text.event_generate("<<Copy>>")
+
+def paste(root: Tk, text: Text):
+    text.event_generate("<<Paste>>")
+
+def delete(root: Tk, text: Text):
+    text.delete("1.0", END)
+
+def about(root: Tk, text: Text):
+    messagebox.showinfo("Help", "Notepad writted in Python")
+    messagebox.OK
+
 root = Tk()
 root.title("Notepad")
 root.geometry("800x600")
 
-text = Text(root)
+text = Text(root, undo=True)
 text.pack(expand=True, fill=BOTH)
 
 menubar = Menu(root)
@@ -88,19 +104,16 @@ filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
 
 editmenu = Menu(menubar, tearoff=0)
-editmenu.add_command(label="Undo", command="")
-editmenu.add_separator()
-editmenu.add_command(label="Cut", command="")
-editmenu.add_command(label="Copy", command="")
-editmenu.add_command(label="Paste", command="")
-editmenu.add_command(label="Delete", command="")
-editmenu.add_command(label="Select All", command="")
+editmenu.add_command(label="Cut - Ctrl + X", command=lambda: cut(root, text))
+editmenu.add_command(label="Copy - Ctrl + C", command=lambda: copy(root, text))
+editmenu.add_command(label="Paste - Ctrl + V", command=lambda: paste(root, text))
+editmenu.add_command(label="Delete", command=lambda: delete(root, text))
 menubar.add_cascade(label="Edit", menu=editmenu)
 
 helpmenu = Menu(menubar, tearoff=0)
-helpmenu.add_command(label="Help Index", command="")
-helpmenu.add_command(label="About...", command="")
+helpmenu.add_command(label="About notepad", command=lambda: about(root, text))
 menubar.add_cascade(label="Help", menu=helpmenu)
+
 root.config(menu=menubar)
 
 
